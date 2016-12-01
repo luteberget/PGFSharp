@@ -63,14 +63,9 @@ namespace PGF
 
 		public static IEnumerable<IntPtr> Iterate(IntPtr iterator, IntPtr pool) {
 			IntPtr ptr = IntPtr.Zero;
-
-			// FIXME: make a general iterator function
 			NativeGU.gu_enum_next (iterator, ref ptr, pool);
 			while (ptr != IntPtr.Zero) {
-
-				// FIXME Get expression
 				yield return ptr;
-
 				NativeGU.gu_enum_next (iterator, ref ptr, pool);
 			}
 		}
