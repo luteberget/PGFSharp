@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 /// </summary>
 namespace PGF
 {
-    static internal class Native {
+    static public class Native {
 
 		internal class NativeString : IDisposable {
 			internal IntPtr Ptr;
@@ -39,6 +39,12 @@ namespace PGF
 				Marshal.Copy(nativeUtf8, buffer, 0, buffer.Length);
 				return Encoding.UTF8.GetString(buffer);
 			}
+		}
+
+		public static void EditStruct<T>(IntPtr ptr, Func<T, T> f) {
+			var str = Marshal.PtrToStructure<T> (ptr);
+			str = f (str);
+			Marshal.StructureToPtr<T> (str, ptr, false);
 		}
 
         const string LIBNAME = "pgf.dll";

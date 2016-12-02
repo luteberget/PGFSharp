@@ -43,12 +43,14 @@
     <Compile Include="Bracket.cs" />
     <Compile Include="Concrete.cs" />
     <Compile Include="Exceptions.cs" />
-    <Compile Include="Expression.cs" />
     <Compile Include="Native.cs" />
     <Compile Include="NativeGU.cs" />
     <Compile Include="Grammar.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Type.cs" />
+    <Compile Include="Expression\Expression.cs" />
+    <Compile Include="Expression\Abs.cs" />
+    <Compile Include="Expression\Literal.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="gu.dll">
@@ -66,4 +68,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Folder Include="Expression\" />
+  </ItemGroup>
 </Project>

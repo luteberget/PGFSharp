@@ -7,11 +7,31 @@ using System.Threading.Tasks;
 
 namespace PGF
 {
-    // TODO
-    // UNFINISHED DO NOT USE
-    public class Expression
+    public abstract class Expression
     {
-        private IntPtr _expr = IntPtr.Zero;
+		public enum PgfExprTag {
+			PGF_EXPR_ABS,
+			PGF_EXPR_APP,
+			PGF_EXPR_LIT,
+			PGF_EXPR_META,
+			PGF_EXPR_FUN,
+			PGF_EXPR_VAR,
+			PGF_EXPR_TYPED,
+			PGF_EXPR_IMPL_ARG,
+			PGF_EXPR_NUM_TAGS
+		};
+
+
+
+		
+		public interface IVisitor<R> {
+			R VisitLiteral (object value);
+			R VisitMetaVariable (int id);
+		}
+
+		public abstract R Accept<R> (IVisitor<R> visitor);
+		
+        protected IntPtr _expr = IntPtr.Zero;
         
 		// The master pointer is used in the Python wrapper, 
 		// which is written in C and therefore needs to help Python 
@@ -19,19 +39,22 @@ namespace PGF
 		// I think.
 		//private IntPtr _master = IntPtr.Zero;
         
-		private IntPtr _pool = IntPtr.Zero;
+		protected IntPtr _pool = IntPtr.Zero;
 
-		public IntPtr NativePtr => _expr;
+		public IntPtr NativePtr { get {return _expr; } }
 
-		private Expression()
+		protected Expression()
         {
         }
 
+
 		public static Expression FromPtr(IntPtr expr, IntPtr pool) {
-			return new Expression () {
+			return null;
+			/*return new Expression () {
+				
 				_expr = expr,
 				_pool = pool,
-			};
+			};*/
 		}
 
         public override string ToString()
@@ -48,6 +71,7 @@ namespace PGF
 			}
         }
 
+		/*
         ~Expression()
         {
             if(_pool != IntPtr.Zero)
@@ -56,5 +80,6 @@ namespace PGF
                 _pool = IntPtr.Zero;
             }
         }
+        */
     }
 }

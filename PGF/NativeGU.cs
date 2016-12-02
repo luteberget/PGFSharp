@@ -43,6 +43,21 @@ namespace PGF
 		[DllImport(LIBNAME, CallingConvention = CC)]
 		public static extern void gu_enum_next (IntPtr enum_, ref IntPtr outPtr, IntPtr pool);
 
+		[DllImport(LIBNAME, CallingConvention = CC)]
+		public static extern GuVariantInfo gu_variant_open (IntPtr variant);
+
+		[DllImport(LIBNAME, CallingConvention = CC)]
+		public static extern IntPtr gu_alloc_variant (byte tag, UIntPtr size, UIntPtr align, ref IntPtr out_, IntPtr pool);
+
+		[DllImport(LIBNAME, CallingConvention = CC)]
+		public static extern IntPtr gu_make_variant (byte tag, UIntPtr size, UIntPtr align, ref IntPtr init, IntPtr pool);
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct GuVariantInfo{
+			public int Tag;
+			public IntPtr Data;
+		}
+
 		public class PoolErr : IDisposable {
 
 			public IntPtr Ptr;
