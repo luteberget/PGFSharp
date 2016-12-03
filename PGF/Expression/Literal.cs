@@ -1,64 +1,77 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace PGF
 {
-	public class Meta : Expression {
-		// initMeta
-		public Meta() : base() {
-			_pool = NativeGU.gu_new_pool ();
-			IntPtr exprMetaPtr = NativeGU.gu_alloc_variant ((byte)PgfExprTag.PGF_EXPR_META,
-				(UIntPtr)Marshal.SizeOf <NativePgfExprMeta>(), UIntPtr.Zero, ref _expr, _pool);
-
-			Native.EditStruct<NativePgfExprMeta> (exprMetaPtr, m => { m.id = 0; return m; } );
-		}
-
-		public override R Accept<R> (IVisitor<R> visitor)
-		{
-			return visitor.VisitMetaVariable (0);
-		}
-
-		[StructLayout(LayoutKind.Sequential)]
-		public struct NativePgfExprMeta { public int id; }
-	}
-	
 	public class Literal : Expression
 	{
 		// initLiteral
 		public Literal (int val)
 		{
+			Initialize<NativePgfLiteralInt> (PgfLiteralTag.PGF_LITERAL_INT,
+				(ref NativePgfLiteralInt ilit) => ilit.val = val);
+		}
+
+		public Literal(double val) {
+			Initialize<NativePgfLiteralFlt> (PgfLiteralTag.PGF_LITERAL_FLT,
+				(ref NativePgfLiteralFlt flit) => flit.val = val);
+		}
+
+		public Literal(string s) {
 			_pool = NativeGU.gu_new_pool ();
 
 			var exprTag = (byte)(int)PgfExprTag.PGF_EXPR_LIT;
 			IntPtr litPtr = NativeGU.gu_alloc_variant ( exprTag,
 				(UIntPtr)Marshal.SizeOf<NativePgfExprLit>(), UIntPtr.Zero, ref _expr, _pool);
 
-			Native.EditStruct<NativePgfExprLit> (litPtr, lit => {
-				var litTag = (byte)(int)NativePgfLiteralTag.PGF_LITERAL_INT;
-				IntPtr ilitPtr = NativeGU.gu_alloc_variant (litTag,
-					(UIntPtr)Marshal.SizeOf<NativePgfLiteralInt> (), UIntPtr.Zero, ref lit.lit, _pool);
+			Native.EditStruct<NativePgfExprLit> (litPtr, (ref NativePgfExprLit lit) => {
+				MkStringVariant((byte)PgfLiteralTag.PGF_LITERAL_STR, s, ref lit.lit);
+			});
+		}
 
-				Native.EditStruct<NativePgfLiteralInt>(ilitPtr, ilit => { ilit.val = val; return ilit; }); 
+		internal Literal(IntPtr ptr, IntPtr pool) : base(ptr, pool) {	}
 
-				return lit;
+
+		private void Initialize<TNative>(PgfLiteralTag litTag, Native.StructAction<TNative> setValue, UIntPtr? size = null) {
+			_pool = NativeGU.gu_new_pool ();
+
+			var exprTag = (byte)(int)PgfExprTag.PGF_EXPR_LIT;
+			IntPtr litPtr = NativeGU.gu_alloc_variant ( exprTag,
+				(UIntPtr)Marshal.SizeOf<NativePgfExprLit>(), UIntPtr.Zero, ref _expr, _pool);
+
+			Native.EditStruct<NativePgfExprLit> (litPtr, (ref NativePgfExprLit lit) => {
+				IntPtr ilitPtr = NativeGU.gu_alloc_variant ((byte)litTag,
+					(UIntPtr)Marshal.SizeOf<TNative> (), UIntPtr.Zero, ref lit.lit, _pool);
+
+				Native.EditStruct<TNative>(ilitPtr, setValue); 
 			});
 		}
 
 		public override R Accept<R> (IVisitor<R> visitor)
 		{
-			return visitor.VisitLiteral (Value);
+			switch (LiteralTag) {
+			case PgfLiteralTag.PGF_LITERAL_STR:
+				return visitor.VisitLiteralStr (Value as string);
+			case PgfLiteralTag.PGF_LITERAL_INT:
+				return visitor.VisitLiteralInt ((int)Value);
+			case PgfLiteralTag.PGF_LITERAL_FLT:
+				return visitor.VisitLiteralFlt ( (double)Value);
+			default:
+				throw new ArgumentException();
+			}
 		}
 
 			public object Value {
 			get {
 				switch (LiteralTag) {
-				case NativePgfLiteralTag.PGF_LITERAL_STR:
-					var _str = Marshal.PtrToStructure<NativePgfLiteralStr> (LitDataPtr);
-					return Native.NativeString.StringFromNativeUtf8(_str.val);
-				case NativePgfLiteralTag.PGF_LITERAL_INT:
+				case PgfLiteralTag.PGF_LITERAL_STR:
+					//var _str = Marshal.PtrToStructure<NativePgfLiteralStr> (LitDataPtr);
+					return Native.NativeString.StringFromNativeUtf8(LitDataPtr);
+				case PgfLiteralTag.PGF_LITERAL_INT:
 					var _int = Marshal.PtrToStructure<NativePgfLiteralInt>(LitDataPtr);
 					return _int.val;
-				case NativePgfLiteralTag.PGF_LITERAL_FLT:
+				case PgfLiteralTag.PGF_LITERAL_FLT:
 					var _flt = Marshal.PtrToStructure<NativePgfLiteralFlt>(LitDataPtr);
 					return _flt.val;
 				default:
@@ -67,43 +80,21 @@ namespace PGF
 			}
 		}
 
-		public static object GetValue(IntPtr ptr) {
-			var variant = NativeGU.gu_variant_open(ptr);
-			var Tag = (NativePgfLiteralTag) variant.Tag;
-			var Data =  variant.Data;
-			var i = (int)Tag;
-			switch (Tag) {
-			case NativePgfLiteralTag.PGF_LITERAL_STR:
-				var _str = Marshal.PtrToStructure<NativePgfLiteralStr> (Data);
-				return Native.NativeString.StringFromNativeUtf8(_str.val);
-			case NativePgfLiteralTag.PGF_LITERAL_INT:
-				var _int = Marshal.PtrToStructure<NativePgfLiteralInt>(Data);
-				return _int.val;
-			case NativePgfLiteralTag.PGF_LITERAL_FLT:
-				var _flt = Marshal.PtrToStructure<NativePgfLiteralFlt>(Data);
-				return _flt.val;
-			default:
-				throw new ArgumentException();
-			}
-		}
+
 		// Expr
-		private IntPtr DataPtr => NativeGU.gu_variant_open(_expr).Data; // PgfExprLit* 
-		private PgfExprTag Tag => (PgfExprTag) NativeGU.gu_variant_open(_expr).Tag;
 
 		// Deref DatPtr to det PgfExprLit.
 		private NativePgfExprLit Data => Marshal.PtrToStructure<NativePgfExprLit>(DataPtr);
 
-		private NativePgfLiteralTag LiteralTag => (NativePgfLiteralTag) NativeGU.gu_variant_open(Data.lit).Tag;
+		private PgfLiteralTag LiteralTag => (PgfLiteralTag) NativeGU.gu_variant_open(Data.lit).Tag;
 		private IntPtr LitDataPtr => NativeGU.gu_variant_open(Data.lit).Data;
 
-		public enum NativePgfLiteralTag {
+		public enum PgfLiteralTag {
 			PGF_LITERAL_STR,
 			PGF_LITERAL_INT,
 			PGF_LITERAL_FLT,
 			PGF_LITERAL_NUM_TAGS
 		}
-		
-
 
 		[StructLayout(LayoutKind.Sequential)]
 		public struct NativePgfExprLit { public IntPtr lit; }

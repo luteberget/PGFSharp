@@ -25,11 +25,16 @@ namespace PGF
 
 			public static IntPtr NativeUtf8FromString(string managedString) {
 				int len = Encoding.UTF8.GetByteCount(managedString);
-				byte[] buffer = new byte[len + 1];
-				Encoding.UTF8.GetBytes(managedString, 0, managedString.Length, buffer, 0);
-				IntPtr nativeUtf8 = Marshal.AllocHGlobal(buffer.Length);
-				Marshal.Copy(buffer, 0, nativeUtf8, buffer.Length);
+				IntPtr nativeUtf8 = Marshal.AllocHGlobal(len+1);
+				CopyToPreallocated (managedString, nativeUtf8, len);
 				return nativeUtf8;
+			}
+
+			public static void CopyToPreallocated(string managedString, IntPtr ptr, int? len = null) {
+				if(len == null) len = Encoding.UTF8.GetByteCount(managedString);
+				byte[] buffer = new byte[len.Value + 1];
+				Encoding.UTF8.GetBytes(managedString, 0, managedString.Length, buffer, 0);
+				Marshal.Copy(buffer, 0, ptr, buffer.Length);
 			}
 
 			public static string StringFromNativeUtf8(IntPtr nativeUtf8) {
@@ -41,9 +46,10 @@ namespace PGF
 			}
 		}
 
-		public static void EditStruct<T>(IntPtr ptr, Func<T, T> f) {
+		public delegate void StructAction<T>(ref T st); 
+		public static void EditStruct<T>(IntPtr ptr, StructAction<T> f) {
 			var str = Marshal.PtrToStructure<T> (ptr);
-			str = f (str);
+			f (ref str);
 			Marshal.StructureToPtr<T> (str, ptr, false);
 		}
 
@@ -63,6 +69,9 @@ namespace PGF
 
         [DllImport(LIBNAME, CallingConvention = CC)]
         public static extern IntPtr pgf_abstract_name(IntPtr pgf);
+
+		[DllImport(LIBNAME, CallingConvention = CC)]
+		public static extern IntPtr pgf_concrete_name(IntPtr concr);
 
         [DllImport(LIBNAME, CallingConvention = CC)]
         public static extern IntPtr pgf_start_cat(IntPtr pgf);

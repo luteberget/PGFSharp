@@ -27,6 +27,10 @@ namespace PGF
 			throw new NotImplementedException ();
 		}
 
+		public string Name => Native.GetPermanentString(Native.pgf_concrete_name, Ptr);
+
+		public override string ToString () => $"Concrete:{Name} of {Grammar.Name}";
+
 		public IEnumerable<Expression> Parse(string str, string catName = null, double? heuristics = null, 
 			Action Callback1 = null, Action Callback2 = null) {
 
@@ -52,6 +56,10 @@ namespace PGF
 					}
 				}
 			}
+		}
+
+		public string Linearize(Expression e) {
+			throw new NotImplementedException ();
 		}
     }
 }

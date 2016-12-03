@@ -84,38 +84,48 @@ namespace PGFTests.NUnit
 
 		[Test]
 		public void LiteralTest() {
+			var intlit = new Literal (5);
+			Assert.AreEqual (5, intlit.Value);
+			Assert.AreEqual ("5", intlit.ToString ());
 
+			var fltlit = new Literal (9.9);
+			Assert.AreEqual (9.9, fltlit.Value);
+			Assert.IsTrue (fltlit.ToString ().StartsWith ("9,9"));
 
-			var _pool = NativeGU.gu_new_pool ();
-			IntPtr _expr = IntPtr.Zero;
+			var strlit = new Literal ("hello");
+			Assert.AreEqual ("hello", strlit.Value);
+			Assert.AreEqual ("\"hello\"", strlit.ToString ());
 
-			var exprTag = (byte)(int)Expression.PgfExprTag.PGF_EXPR_LIT;
-			IntPtr litPtr = NativeGU.gu_alloc_variant (exprTag, 
-				(UIntPtr)Marshal.SizeOf<Literal.NativePgfExprLit>(), UIntPtr.Zero, ref _expr, _pool);
+			foreach(var l in new[]{ intlit, fltlit, strlit})
+			  Assert.IsInstanceOf<Literal> (Expression.FromPtr (l.NativePtr, IntPtr.Zero));
+		}
 
-			Native.EditStruct<Literal.NativePgfExprLit> (litPtr, lit => {
-				var litTag = (byte)(int)Literal.NativePgfLiteralTag.PGF_LITERAL_INT;
-				IntPtr ilitPtr = NativeGU.gu_alloc_variant (litTag,
-					(UIntPtr)Marshal.SizeOf<Literal.NativePgfLiteralInt> (), UIntPtr.Zero, ref lit.lit, _pool);
-				Native.EditStruct<Literal.NativePgfLiteralInt>(ilitPtr, ilit => { ilit.val = 55; return ilit; }); 
-				return lit;
-			});
+		[Test]
+		public void MetaVariableTest() {
+			var meta = new MetaVariable ();
+			Assert.AreEqual ("?", meta.ToString ());
+			Assert.AreEqual (0, meta.Id);
+			Assert.IsInstanceOf<MetaVariable> (Expression.FromPtr (meta.NativePtr, IntPtr.Zero));
+		}
 
-			//var lit = new Literal ();
+		[Test]
+		public void ApplicationTest() {
+			var arg1 = new Literal (1);
+			var arg2 = new Literal ("xyz");
+			var fname = "hello";
 
+			var expr = new Application (fname, new[]{ arg1, arg2 });
+			Assert.AreEqual ("hello 1 \"xyz\"", expr.ToString ());
+			Assert.IsInstanceOf<Application> (expr.Function);
+			Assert.IsInstanceOf<Literal> (expr.Argument);
+			Assert.AreEqual ("xyz", (expr.Argument as Literal).Value);
+			var inner = expr.Function as Application;
 
-			var lit2 = new Literal (5);
+			Assert.IsInstanceOf<Function> (inner.Function);
+			var fun = inner.Function as Function;
+			Assert.AreEqual ("hello", fun.Name);
 
-			//var str = lit.ToString ();
-
-			//Assert.AreSame ("?", str);
-
-			var no = lit2.Value;
-
-			var str2 = lit2.ToString ();
-
-			Assert.AreEqual ("5", str2);
-
+			Assert.AreEqual (1, (inner.Argument as Literal).Value);
 		}
 
 
@@ -125,6 +135,17 @@ namespace PGFTests.NUnit
 			var asByte = (byte)(Expression.PgfExprTag.PGF_EXPR_LIT);
 			var asByte2 = (byte)((int)(Expression.PgfExprTag.PGF_EXPR_LIT));
 
+		}
+
+		[Test]
+		public void NullaryFunctionIsApplication() {
+
+			using (var grammar = Grammar.FromFile ("/home/bjlut/LLCNL/HighLevel.pgf")) {
+				var expr1 = grammar.ReadExpression ("asdfasdf asd");
+
+				Assert.IsInstanceOf<Function> (expr1);
+				Assert.IsInstanceOf<Application> (expr1);
+			}
 		}
 	}
 }

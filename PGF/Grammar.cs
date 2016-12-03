@@ -28,6 +28,9 @@ namespace PGF
 			}
         }
 
+
+		public override string ToString () => $"Grammar:{Name}, {String.Join(", ", Languages.Keys)}";
+
         public string Name => Native.GetPermanentString(Native.pgf_abstract_name, _pgf);
         public string StartCat => Native.GetPermanentString(Native.pgf_start_cat, _pgf);
 

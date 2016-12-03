@@ -34,16 +34,25 @@ namespace ExportGFTypes
 		    xs.Take(1).Concat(Sieve(xs.Skip(1).Where(n => n % xs.First() > 0)));
 
 		static void Main() {
+			var grammar = Grammar.FromFile ("");
+			var language = grammar.Languages.Values.First ();
+
+			language.Parse ("Is 5 prime?");
+
 			string input = null;
 			Expression inputExpr = null; // Parse expression
 			Expression inputExpr2 = null; // Parse concerte language
 
 			Query.Question question = Query.Question.FromExpression (inputExpr);
 
+
+			var answer = Transfer (Query.Question.FromExpression (language.Parse ("Is 5 prime?").First()));
+			var answerText = language.Linearize (answer.ToExpression ());
+
 			// Do something
 
-			Query.Answer answer = Transfer (question);
-			var outputExpr = answer.ToExpression ();
+			/*Query.Answer answer = Transfer (question);
+			var outputExpr = answer.ToExpression ();*/
 		}
 
 		/*private class QuestionAnswerVisitor : Query.Question.Visitor<Query.Answer> {
@@ -110,7 +119,7 @@ namespace ExportGFTypes
 
 		public abstract string ToExpressionString();
 
-		public Expression ToExpression() {
+		public virtual Expression ToExpression() {
 			throw new NotImplementedException ();
 			///return ToExpressionString ();
 		}
@@ -178,13 +187,14 @@ namespace ExportGFTypes
 			public abstract R Accept<R>(IVisitor<R> visitor);
 
 			public static Object FromExpression(Expression expr) {
-				//var unApp = expr.UnApp ();
-				string unApp = null;
-
-				if (unApp == "Number x")
-					return new Number (0);
-
-				throw new ArgumentOutOfRangeException ();
+				return expr.Accept(new Expression.Visitor<Object> {
+					fVisitApplication = (fn, args) => {
+						if(fn == "Number" && args.Length == 1) {
+							return new Number((int)(args.First() as Literal).Value);
+						}
+						throw new NotImplementedException();
+					}
+				});
 			}
 
 			public class Visitor<R> : IVisitor<R>{
@@ -201,9 +211,11 @@ namespace ExportGFTypes
 		public class Number : Object {
 			public override string ClassName => nameof(Number);
 
-			public override string ToExpressionString ()
+			public override string ToExpressionString() => ToExpression().ToString();
+
+			public override Expression ToExpression ()
 			{
-				return MkApp(ClassName, new[]{Int0}.Select(x => x.ToString()));
+				return new PGF.Application("Number", new[]{new Literal(Int0)});
 			}
 
 			public int Int0 { get; set;}

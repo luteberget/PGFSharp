@@ -49,8 +49,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Type.cs" />
     <Compile Include="Expression\Expression.cs" />
-    <Compile Include="Expression\Abs.cs" />
     <Compile Include="Expression\Literal.cs" />
+    <Compile Include="Expression\MetaVariable.cs" />
+    <Compile Include="Expression\Application.cs" />
+    <Compile Include="Expression\Function.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="gu.dll">
