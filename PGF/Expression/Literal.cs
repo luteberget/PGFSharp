@@ -33,7 +33,7 @@ namespace PGF
 		internal Literal(IntPtr ptr, IntPtr pool) : base(ptr, pool) {	}
 
 
-		private void Initialize<TNative>(PgfLiteralTag litTag, Native.StructAction<TNative> setValue, UIntPtr? size = null) {
+		protected void Initialize<TNative>(PgfLiteralTag litTag, Native.StructAction<TNative> setValue, UIntPtr? size = null) {
 			_pool = NativeGU.gu_new_pool ();
 
 			var exprTag = (byte)(int)PgfExprTag.PGF_EXPR_LIT;

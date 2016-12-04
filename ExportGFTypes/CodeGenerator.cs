@@ -26,22 +26,22 @@ namespace ExportGFTypes
 		}
 
 		//private const string VisitorTypeParam = "R";
+		private static string VISITOR_PARAM = "R";
+
+		private static readonly Dictionary<string,string> _csharpTypeMap = new Dictionary<string, string> {
+			{"Int","int"},
+			{"Float","double"},
+			{"String","string"},
+			{VISITOR_PARAM, VISITOR_PARAM}
+		};
 
 		private static string CategoryToCSharpDatatype (string namespc, string name)
 		{
-			// Special cases for built-in types
-			// FIXME: maybe this is not needed -- the C# data types have accidentaly the same names?
-			if (name == "Int")
-				return "int";
-			if (name == "Float")
-				return "double";
-			if (name == "String")
-				return "string";
-			if (name == VISITOR_PARAM)
-				return name;
-
+			if(IsBuiltinType(name)) return _csharpTypeMap[name];
 			return $"{namespc}.{name}";
 		}
+
+		private static bool IsBuiltinType(string name) => _csharpTypeMap.ContainsKey(name);
 
 		private static IEnumerable<string> VariableNames ()
 		{
@@ -59,7 +59,6 @@ namespace ExportGFTypes
 		private static string TypeList (string namespc, IEnumerable<string> types) =>
 		String.Join(",", types.Select(s => CategoryToCSharpDatatype(namespc, s)));
 
-		private static string VISITOR_PARAM = "R";
 
 		public static string ToString (Grammar grammar)
 		{
@@ -67,8 +66,10 @@ namespace ExportGFTypes
 			Action<string> print = s => b.AppendLine (s);
 
 			using (var namespc = new Bracketed (print, $"namespace {grammar.Name}")) { 
-
+				Func<string,string> typeName = n => CategoryToCSharpDatatype(grammar.Name, n);
 				foreach (var cat in grammar.Categories) {
+
+					// Abstract class (category) 
 					using (var catClass = new Bracketed (namespc.Print, $"public abstract {cat.Name} : Tree")) { 
 						catClass.Print ("public abstract R Accept<R>(IVisitor<R> visitor);");
 
@@ -106,27 +107,67 @@ namespace ExportGFTypes
 
 							foreach (var impl in interfaceImplementaion)
 								visitorClass.Print (impl);
+
+
+
+						}
+
+						// FromExpression
+						using(var fromExpr = new Bracketed(catClass.Print, $"public static {cat.Name} FromExpression(Expression expr)")) {
+							fromExpr.Print($"var visitor = new Expression.Visitor<{cat.Name}>();");
+							using(var visitApp = new Bracketed(fromExpr.Print, $"visitor.fVisitApplication = (fname, args) =>", true)) {
+								foreach(var constr in cat.Constructors) {
+									visitApp.Print($"if(fname == nameof({constr.Name}) && args.Length == {constr.ArgumentTypes.Count()})");
+
+									var args = constr.ArgumentTypes.Select((t,i) => {
+										if(IsBuiltinType(t)) return $"({typeName(t)})(((Literal)args[{i}]).Value)";
+										return $"{t}.FromExpression(args[{i}])";
+									});
+
+									visitApp.Print($"  return new {constr.Name}({String.Join(", ", args)});");
+
+
+
+								}
+								visitApp.Print("throw new ArgumentOutOfRangeException();");
+							}
+							fromExpr.Print("return expr.Accept(visitor);");
 						}
 					}
 
+
 					foreach (var constr in cat.Constructors) {
 
+						// Concrete class (category constructor)
 						using (var constrClass = new Bracketed (namespc.Print, $"public class {constr.Name} : {cat.Name}")) { 
 
-							var fields = constr.ArgumentTypes.Zip(VariableNames(), (type, name) => $"public {type} {name} {{get; set;}}");
-							var constructorArgs = String.Join(", ", constr.ArgumentTypes.Zip(VariableNames(), (type, name) => $"{type} {name}"));
+							var fields = constr.ArgumentTypes.Zip(VariableNames(), (type, name) => $"public {typeName(type)} {name} {{get; set;}}");
+							var constructorArgs = String.Join(", ", constr.ArgumentTypes.Zip(VariableNames(), (type, name) => $"{typeName(type)} {name}"));
 							var vars = VariableNames().Take(constr.ArgumentTypes.Count());
 							var varList = String.Join(", ", vars);
 							var constructorAssignments = vars.Select(name => $"this.{name} = {name};");
 
+							// Fields (for constructor arguments)
 							foreach(var f in fields) constrClass.Print(f);
 
+							// Constructor
 							using(var constrConstructor = new Bracketed(constrClass.Print, $"public {constr.Name}({constructorArgs})")) {
 								foreach(var a in constructorAssignments) constrConstructor.Print(a);
 							}
 
+							// Visitor
 							using(var visitorAccept = new Bracketed(constrClass.Print, "public override R Accept<R>(IVisitor<R> visitor)")) {
 								visitorAccept.Print($"visitor.Visit{constr.Name}({varList});");
+							}
+
+							// FromExpression
+							using(var fromExpr = new Bracketed(constrClass.Print, "public override Expression ToExpression()")) {
+								var args = constr.ArgumentTypes.Zip(VariableNames(), (type, name) =>  {
+									if(IsBuiltinType(type)) return $"new Literal({name})";
+									return $"{name}.ToExpression()";
+								});
+								var argsArray = $"new Expression[]{{{String.Join(", ", args)}}}";
+								fromExpr.Print($"return new Application(nameof({constr.Name}), {argsArray});");
 							}
 						}
 					}
@@ -138,10 +179,11 @@ namespace ExportGFTypes
 		public class Bracketed : IDisposable
 		{
 			Action<string> printer;
-
-			public Bracketed (Action<string> printer, string something)
+			bool semicolon;
+			public Bracketed (Action<string> printer, string something,bool semicolon = false)
 			{
 				this.printer = printer;
+				this.semicolon = semicolon;
 				printer (something + " {");
 			}
 
@@ -149,7 +191,7 @@ namespace ExportGFTypes
 
 			public void Dispose ()
 			{
-				printer ("}");
+				printer (semicolon ? "};" : "}");
 				printer ("");
 			}
 		}

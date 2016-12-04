@@ -15,7 +15,7 @@ namespace PGF
 				args.Add (expr.Argument);
 				expr = expr.Function as Application;
 			}
-
+			args.Add (expr.Argument);
 			if (!(expr.Function is Function))
 				throw new ArgumentException ();
 

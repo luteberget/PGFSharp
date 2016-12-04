@@ -3,6 +3,7 @@ using System;
 using PGF;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 
 namespace PGFTests.NUnit
@@ -143,8 +144,19 @@ namespace PGFTests.NUnit
 			using (var grammar = Grammar.FromFile ("/home/bjlut/LLCNL/HighLevel.pgf")) {
 				var expr1 = grammar.ReadExpression ("asdfasdf asd");
 
-				Assert.IsInstanceOf<Function> (expr1);
+				//Assert.IsInstanceOf<Function> (expr1);
 				Assert.IsInstanceOf<Application> (expr1);
+
+				var expr2 = grammar.ReadExpression ("asdf (xaxa lala) (xaxa lala kaka)");
+
+				var vstr = new Expression.Visitor<string> ();
+				Func<IEnumerable<Expression>,IEnumerable<string>> ag = args => args.Select (a => a.Accept (vstr));
+				vstr.fVisitApplication = (fn, args) => $"_{fn}({String.Join(",", ag(args))})";
+
+				var outString2 = expr2.Accept(vstr);
+
+				//Assert.AreEqual ("_asdf", outString);
+				Assert.AreEqual ("_asdf(_xaxa(_lala()),_xaxa(_lala(),_kaka()))", outString2);
 			}
 		}
 	}

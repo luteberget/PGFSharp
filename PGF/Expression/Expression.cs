@@ -98,23 +98,22 @@ namespace PGF
 			_expr = ptr; _pool = pool;
         }
 
+		// Factories
+		private static Dictionary<PgfExprTag, Func<IntPtr, IntPtr, Expression>> factories = 
+			new Dictionary<PgfExprTag, Func<IntPtr, IntPtr, Expression>>{
+
+			{ PgfExprTag.PGF_EXPR_LIT, (e, p) => new Literal (e, p) },
+			{ PgfExprTag.PGF_EXPR_APP, (e, p) => new Application (e, p) },
+			{ PgfExprTag.PGF_EXPR_FUN, (e, p) => new Function (e, p) },
+			{ PgfExprTag.PGF_EXPR_META, (e, p) => new MetaVariable (e, p) }
+		};
 
 		public static Expression FromPtr(IntPtr expr, IntPtr pool) {
 			var Tag = (PgfExprTag) NativeGU.gu_variant_open(expr).Tag;
-
-			switch (Tag) {
-			case PgfExprTag.PGF_EXPR_LIT:
-				return new Literal (expr, pool);
-			case PgfExprTag.PGF_EXPR_APP:
-				return new Application (expr, pool);
-			case PgfExprTag.PGF_EXPR_FUN:
-				return new Function (expr, pool);
-			case PgfExprTag.PGF_EXPR_META:
-				return new MetaVariable(expr, pool);
-			default:
-				return new UnsupportedExpression (expr, pool); // As some variants are not implemented in this wrapper yet, 
-				// we allow the arbitrary expression class as fallthrough.
-			}
+			if (factories.ContainsKey (Tag)) {
+				return factories [Tag] (expr, pool);
+			} else
+				return new UnsupportedExpression (expr, pool);
 		}
 
         public override string ToString()
@@ -126,10 +125,11 @@ namespace PGF
 				Native.pgf_print_expr (_expr, IntPtr.Zero, 0, output, pool.ErrPtr);
 
 				var strPtr = NativeGU.gu_string_buf_freeze (sbuf, pool.Ptr);
-				var str = Marshal.PtrToStringAnsi (strPtr);
+				var str = Native.NativeString.StringFromNativeUtf8 (strPtr);
 				return str;
 			}
         }
+
 
 		/*
         ~Expression()
@@ -139,7 +139,6 @@ namespace PGF
                 NativeGU.gu_pool_free(_pool);
                 _pool = IntPtr.Zero;
             }
-        }
-        */
+        }*/
     }
 }
