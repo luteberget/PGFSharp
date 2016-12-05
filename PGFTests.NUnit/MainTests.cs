@@ -17,7 +17,7 @@ namespace PGFTests.NUnit
 		[Test ()]
 		public void LoadGrammar ()
 		{    
-			using (var grammar = Grammar.FromFile ("/home/bjlut/LLCNL/HighLevel.pgf")) 
+			using (var grammar = Grammar.FromFile ("/home/bjlut/LLCNL/unstructured/HighLevel.pgf")) 
 			{
 				var name = grammar.Name;
 				var dict = grammar.Languages;
@@ -48,7 +48,7 @@ namespace PGFTests.NUnit
 		[Test]
 		public void ReadType() {
 
-			using (var grammar = Grammar.FromFile ("/home/bjlut/LLCNL/HighLevel.pgf")) {
+			using (var grammar = Grammar.FromFile ("/home/bjlut/LLCNL/unstructured/HighLevel.pgf")) {
 
 				var type_fail = grammar.ReadType ("xyz");
      			var type_succeed = grammar.ReadType ("Constraint");
@@ -58,7 +58,7 @@ namespace PGFTests.NUnit
 		[Test]
 		public void ReadExpression() {
 
-			using (var grammar = Grammar.FromFile ("/home/bjlut/LLCNL/HighLevel.pgf")) {
+			using (var grammar = Grammar.FromFile ("/home/bjlut/LLCNL/unstructured/HighLevel.pgf")) {
 				var expr1 = grammar.ReadExpression ("Track");
 				var expr2 = grammar.ReadExpression ("(Track)");
 
@@ -75,7 +75,7 @@ namespace PGFTests.NUnit
 
 		[Test]
 		public void ParseTest() {
-			using (var grammar = Grammar.FromFile ("/home/bjlut/LLCNL/HighLevel.pgf")) {
+			using (var grammar = Grammar.FromFile ("/home/bjlut/LLCNL/unstructured/HighLevel.pgf")) {
 				var lang = grammar.Languages.First ().Value;
 				var res = lang.Parse ("et spor må være et spor").FirstOrDefault ();
 
@@ -141,7 +141,7 @@ namespace PGFTests.NUnit
 		[Test]
 		public void NullaryFunctionIsApplication() {
 
-			using (var grammar = Grammar.FromFile ("/home/bjlut/LLCNL/HighLevel.pgf")) {
+			using (var grammar = Grammar.FromFile ("/home/bjlut/LLCNL/unstructured/HighLevel.pgf")) {
 				var expr1 = grammar.ReadExpression ("asdfasdf asd");
 
 				//Assert.IsInstanceOf<Function> (expr1);

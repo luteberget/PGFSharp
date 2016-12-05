@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B9B29BA2-8DF9-4D36-82C1-FD349E269A33}</ProjectGuid>
+    <ProjectGuid>{BE874456-E375-4F30-8A4C-DA9CFD39C4AC}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>ExportGFTypes</RootNamespace>
-    <AssemblyName>ExportGFTypes</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <RootNamespace>XSD2GF</RootNamespace>
+    <AssemblyName>XSD2GF</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -29,25 +29,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="CommandLine">
-      <HintPath>..\packages\CommandLineParser.1.9.71\lib\net45\CommandLine.dll</HintPath>
-    </Reference>
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MyClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="CodeGenerator.cs" />
-    <Compile Include="Properties\Query.cs" />
-    <Compile Include="PGFGrammarInput.cs" />
-    <Compile Include="Main.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <ProjectReference Include="..\PGF\PGFSharp.csproj">
-      <Project>{81C13B1B-FE00-4A56-A831-964D55032CDD}</Project>
-      <Name>PGFSharp</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
 </Project>
