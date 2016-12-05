@@ -9,6 +9,26 @@ This project contains three parts:
 
 Together, these part produce a very lightweight PGF library which can be used in Windows desktop applications.
 
+## Development status
+The library can be used for basic PGF applications, but some work remains:
+
+ * Some memory management issues remain, notably in the clean-up of the `Expression` class. Will use the Python wrapper as example of how this should be done.
+ * Callback noun functions from parser are not yet supported, should be easy.
+ * Parser sentence completion (predictive parsing).
+ * Load/unload languages.
+
+The following items are **not** planned for inclusion.
+
+ * Higher-order and dependent types can be used through the basic inteface, but the `Expression` class does not support manipulation of them.
+ * Representing type information in C#.
+ * Evaluation of parses (not planned for implementation).
+ * Tabular linearize.
+ * Bracketed linearize.
+ * Graphviz generation.
+ * Full form lexicon.
+ * Morphological lookup.
+ * Type-check expression.
+
 ## An application using the 
 
 Following the example in the 
