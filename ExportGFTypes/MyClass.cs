@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using PGF;
-using ExportGFTypes.Query;
 namespace ExportGFTypes
 {
 
@@ -16,80 +15,13 @@ namespace ExportGFTypes
 		public MyClass ()
 		{
 			//var ans = Query.Answer.FromExpression (Expression.FromString("Yes"));
-			var x = Query.Answer.FromExpression(null);
+			//var x = Query.Answer.FromExpression(null);
 
 		}
 	}
 
 	// GF tutorial: putting it all together (answer query function)
 
-
-	public class Application {
-		
-		public static bool IsOdd (int x) => x % 2 == 1;
-		public static bool IsEven (int x) => x % 2 == 0;
-		public static bool IsPrime (int x) => Sieve(Enumerable.Range(2,x)).Contains(x);
-		public static IEnumerable<int> Sieve(IEnumerable<int> xs) => 
-		  !xs.Any() ? Enumerable.Empty<int>() :
-		    xs.Take(1).Concat(Sieve(xs.Skip(1).Where(n => n % xs.First() > 0)));
-
-		static void Main() {
-			var grammar = Grammar.FromFile ("");
-			var language = grammar.Languages.Values.First ();
-
-			language.Parse ("Is 5 prime?");
-
-			string input = null;
-			Expression inputExpr = null; // Parse expression
-			Expression inputExpr2 = null; // Parse concerte language
-
-			Query.Question question = Query.Question.FromExpression (inputExpr);
-
-
-			var answer = Transfer (Query.Question.FromExpression (language.Parse ("Is 5 prime?").First()));
-			var answerText = language.Linearize (answer.ToExpression ());
-
-			// Do something
-
-			/*Query.Answer answer = Transfer (question);
-			var outputExpr = answer.ToExpression ();*/
-		}
-
-		/*private class QuestionAnswerVisitor : Query.Question.Visitor<Query.Answer> {
-			public Query.Answer VisitPrime (Query.Object Object0) => Test (IsPrime, Object0);
-			public Query.Answer VisitOdd (Query.Object Object0) => Test (IsOdd, Object0);
-			public Query.Answer VisitEven (Query.Object Object0) => Test (IsEven, Object0);
-		}*/
-
-		private static Answer Transfer(Question q) {
-			//return q.Accept(new QuestionAnswerVisitor ());
-			return q.Accept(new Question.Visitor<Answer>(
-				VisitPrime: obj => Test(IsPrime, obj),
-				VisitOdd: obj => Test(IsOdd, obj),
-				VisitEven: obj => Test(IsEven, obj)
-			));
-		}
-
-		/*private class ObjectNumberVisitor : Query.Object.Visitor<int> {
-			public int VisitNumber (int Int0) => Int0;
-		}*/
-
-		private static int IntValue(Query.Object o) {
-			return o.Accept (new Query.Object.Visitor<int>(i => i));
-		}
-
-		private static Answer Test (Func<int, bool> testF, Query.Object obj) =>
-		  testF(IntValue(obj)) ? (Answer) new Yes() : (Answer) new No();
-
-		/*{
-			if(test(Value(obj))) {
-				return new Yes();
-			} else {
-				return new No();
-			}
-		}*/
-		  //test(Value(obj)) ? (Query.Answer) new Query.Yes() : (Query.Answer) new Query.No();
-	}
 
 /*
  * 
@@ -131,7 +63,7 @@ namespace ExportGFTypes
 		protected string MkApp(string CId, IEnumerable<string> args)  => "(" + CId + " " + String.Join(" ", args) +  ")";
 	}
 
-	namespace Query {
+	/*namespace Query {
 		public abstract class Answer : Tree {
 			public abstract R Accept<R>(IVisitor<R> visitor);
 			public interface IVisitor<R> {
@@ -312,6 +244,6 @@ namespace ExportGFTypes
 				return visitor.VisitEven(Object0);
 			}
 		}
-	}
+	}*/
 }
 

@@ -78,6 +78,9 @@ namespace PGF
 
         [DllImport(LIBNAME, CallingConvention = CC)]
         public static extern void pgf_print_expr(IntPtr expr, IntPtr ctxt, int prec, IntPtr output, IntPtr err);
+
+		[DllImport(LIBNAME, CallingConvention = CC)]
+		public static extern void pgf_linearize (IntPtr concr, IntPtr expr, IntPtr out_, IntPtr err);
 		#endregion
 
 

@@ -65,12 +65,16 @@ namespace ExportGFTypes
 			var b = new StringBuilder ();
 			Action<string> print = s => b.AppendLine (s);
 
+			using (var tree = new Bracketed (print, "public abstract class Tree")) {
+				tree.Print ("public abstract Expression ToExpression();");
+			}
+
 			using (var namespc = new Bracketed (print, $"namespace {grammar.Name}")) { 
 				Func<string,string> typeName = n => CategoryToCSharpDatatype(grammar.Name, n);
 				foreach (var cat in grammar.Categories) {
 
 					// Abstract class (category) 
-					using (var catClass = new Bracketed (namespc.Print, $"public abstract {cat.Name} : Tree")) { 
+					using (var catClass = new Bracketed (namespc.Print, $"public abstract class {cat.Name} : Tree")) { 
 						catClass.Print ("public abstract R Accept<R>(IVisitor<R> visitor);");
 
 						using (var visitorInterface = new Bracketed (catClass.Print, "public interface IVisitor<R>")) {
@@ -114,24 +118,23 @@ namespace ExportGFTypes
 
 						// FromExpression
 						using(var fromExpr = new Bracketed(catClass.Print, $"public static {cat.Name} FromExpression(Expression expr)")) {
-							fromExpr.Print($"var visitor = new Expression.Visitor<{cat.Name}>();");
-							using(var visitApp = new Bracketed(fromExpr.Print, $"visitor.fVisitApplication = (fname, args) =>", true)) {
-								foreach(var constr in cat.Constructors) {
-									visitApp.Print($"if(fname == nameof({constr.Name}) && args.Length == {constr.ArgumentTypes.Count()})");
-
+							//fromExpr.Print($"var visitor = new Expression.Visitor<{cat.Name}>();");
+							using(var visitor = new Bracketed(fromExpr.Print, $"return expr.Accept(new Expression.Visitor<{cat.Name}>()", ");")) {
+								using(var visitApp = new Bracketed(visitor.Print,$"fVisitApplication = (fname,args) => ")) {
+									foreach(var constr in cat.Constructors) {
+										visitApp.Print($"if(fname == nameof({constr.Name}) && args.Length == {constr.ArgumentTypes.Count()})");
+	
 									var args = constr.ArgumentTypes.Select((t,i) => {
-										if(IsBuiltinType(t)) return $"({typeName(t)})(((Literal)args[{i}]).Value)";
-										return $"{t}.FromExpression(args[{i}])";
-									});
-
-									visitApp.Print($"  return new {constr.Name}({String.Join(", ", args)});");
-
-
-
+											if(IsBuiltinType(t)) return $"({typeName(t)})(((Literal)args[{i}]).Value)";
+											return $"{t}.FromExpression(args[{i}])";
+										});
+	
+										visitApp.Print($"  return new {constr.Name}({String.Join(", ", args)});");
+	
+									}
+									visitApp.Print("throw new ArgumentOutOfRangeException();");
 								}
-								visitApp.Print("throw new ArgumentOutOfRangeException();");
 							}
-							fromExpr.Print("return expr.Accept(visitor);");
 						}
 					}
 
@@ -157,7 +160,7 @@ namespace ExportGFTypes
 
 							// Visitor
 							using(var visitorAccept = new Bracketed(constrClass.Print, "public override R Accept<R>(IVisitor<R> visitor)")) {
-								visitorAccept.Print($"visitor.Visit{constr.Name}({varList});");
+								visitorAccept.Print($"return visitor.Visit{constr.Name}({varList});");
 							}
 
 							// FromExpression
@@ -179,11 +182,11 @@ namespace ExportGFTypes
 		public class Bracketed : IDisposable
 		{
 			Action<string> printer;
-			bool semicolon;
-			public Bracketed (Action<string> printer, string something,bool semicolon = false)
+			string after;
+			public Bracketed (Action<string> printer, string something,string after = null)
 			{
 				this.printer = printer;
-				this.semicolon = semicolon;
+				this.after = after;
 				printer (something + " {");
 			}
 
@@ -191,7 +194,7 @@ namespace ExportGFTypes
 
 			public void Dispose ()
 			{
-				printer (semicolon ? "};" : "}");
+				printer ("}" + (after ?? ""));
 				printer ("");
 			}
 		}

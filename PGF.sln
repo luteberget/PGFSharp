@@ -15,12 +15,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExportGFTypes", "ExportGFTy
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExportGFTypes.NUnit", "ExportGFTypes.NUnit\ExportGFTypes.NUnit.csproj", "{5C79FF9A-4079-4910-AED7-11A68CABF90D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueryApplication", "QueryApplication\QueryApplication.csproj", "{01DE3C68-ABC8-40F5-A4DE-3712E0F7F0BD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{01DE3C68-ABC8-40F5-A4DE-3712E0F7F0BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01DE3C68-ABC8-40F5-A4DE-3712E0F7F0BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01DE3C68-ABC8-40F5-A4DE-3712E0F7F0BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01DE3C68-ABC8-40F5-A4DE-3712E0F7F0BD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{21EC8AC0-C8A6-4913-B76A-2DCB17304FF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{21EC8AC0-C8A6-4913-B76A-2DCB17304FF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{21EC8AC0-C8A6-4913-B76A-2DCB17304FF6}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -59,6 +59,21 @@ namespace PGF
 		}
 
 		public string Linearize(Expression e) {
+			using (var tmpPool = new NativeGU.PoolErr ()) {
+				var buf = NativeGU.gu_string_buf (tmpPool.Ptr);
+				var out_ = NativeGU.gu_string_buf_out (buf);
+
+				Native.pgf_linearize(Ptr, e.NativePtr, out_, tmpPool.ErrPtr);
+				if (tmpPool.Exception) {
+					throw new PGF.Exceptions.PGFException();
+				} else {
+					var cstr = NativeGU.gu_string_buf_freeze (out_, tmpPool.Ptr);
+					return Native.NativeString.StringFromNativeUtf8 (cstr);
+				}
+			}
+		}
+
+		public string LinearizeAll(Expression e) {
 			throw new NotImplementedException ();
 		}
     }

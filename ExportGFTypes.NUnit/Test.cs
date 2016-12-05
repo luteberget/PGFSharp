@@ -9,9 +9,11 @@ namespace ExportGFTypes.NUnit
 		[Test ()]
 		public void TestCase ()
 		{
+			/*
 			var query = new Query.Even (new Query.Number (15));
 			var queryString = query.ToExpressionString ();
 			//var expr = PGF.Grammar.
+			*/
 		}
 
 		[Test]
