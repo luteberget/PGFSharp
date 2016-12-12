@@ -66,7 +66,7 @@ namespace ExportGFTypes
 			Action<string> print = s => b.AppendLine (s);
 
 			using (var tree = new Bracketed (print, "public abstract class Tree")) {
-				tree.Print ("public abstract Expression ToExpression();");
+				tree.Print ("public abstract PGF.Expression ToExpression();");
 			}
 
 			using (var namespc = new Bracketed (print, $"namespace {grammar.Name}")) { 
@@ -87,7 +87,7 @@ namespace ExportGFTypes
 							var constrNames = cat.Constructors.Select (c => c.Name);
 							var argLists = cat.Constructors.Select (c => ArgList (grammar.Name, c.ArgumentTypes));
 							var varLists = cat.Constructors.Select (c => String.Join(", ", VariableNames ().Take (c.ArgumentTypes.Count ())));
-							var lambdaTypes = cat.Constructors.Select (c => $"Func<{TypeList(grammar.Name, c.ArgumentTypes.Concat(new[]{VISITOR_PARAM}))}>");
+							var lambdaTypes = cat.Constructors.Select (c => $"System.Func<{TypeList(grammar.Name, c.ArgumentTypes.Concat(new[]{VISITOR_PARAM}))}>");
 							var funcFields = constrNames.Zip (lambdaTypes,
 								                 (name, type) => $"private {type} _Visit{name} {{ get; set; }}");
 							var constructorArgs = String.Join (", ", constrNames.Zip (lambdaTypes,
@@ -117,22 +117,22 @@ namespace ExportGFTypes
 						}
 
 						// FromExpression
-						using(var fromExpr = new Bracketed(catClass.Print, $"public static {cat.Name} FromExpression(Expression expr)")) {
+						using(var fromExpr = new Bracketed(catClass.Print, $"public static {cat.Name} FromExpression(PGF.Expression expr)")) {
 							//fromExpr.Print($"var visitor = new Expression.Visitor<{cat.Name}>();");
-							using(var visitor = new Bracketed(fromExpr.Print, $"return expr.Accept(new Expression.Visitor<{cat.Name}>()", ");")) {
+							using(var visitor = new Bracketed(fromExpr.Print, $"return expr.Accept(new PGF.Expression.Visitor<{cat.Name}>()", ");")) {
 								using(var visitApp = new Bracketed(visitor.Print,$"fVisitApplication = (fname,args) => ")) {
 									foreach(var constr in cat.Constructors) {
 										visitApp.Print($"if(fname == nameof({constr.Name}) && args.Length == {constr.ArgumentTypes.Count()})");
 	
 									var args = constr.ArgumentTypes.Select((t,i) => {
-											if(IsBuiltinType(t)) return $"({typeName(t)})(((Literal)args[{i}]).Value)";
+											if(IsBuiltinType(t)) return $"((PGF.Literal{t})args[{i}]).Value";
 											return $"{t}.FromExpression(args[{i}])";
 										});
 	
 										visitApp.Print($"  return new {constr.Name}({String.Join(", ", args)});");
 	
 									}
-									visitApp.Print("throw new ArgumentOutOfRangeException();");
+									visitApp.Print("throw new System.ArgumentOutOfRangeException();");
 								}
 							}
 						}
@@ -164,13 +164,13 @@ namespace ExportGFTypes
 							}
 
 							// FromExpression
-							using(var fromExpr = new Bracketed(constrClass.Print, "public override Expression ToExpression()")) {
+							using(var fromExpr = new Bracketed(constrClass.Print, "public override PGF.Expression ToExpression()")) {
 								var args = constr.ArgumentTypes.Zip(VariableNames(), (type, name) =>  {
-									if(IsBuiltinType(type)) return $"new Literal({name})";
+									if(IsBuiltinType(type)) return $"new PGF.Literal{type}({name})";
 									return $"{name}.ToExpression()";
 								});
-								var argsArray = $"new Expression[]{{{String.Join(", ", args)}}}";
-								fromExpr.Print($"return new Application(nameof({constr.Name}), {argsArray});");
+								var argsArray = $"new PGF.Expression[]{{{String.Join(", ", args)}}}";
+								fromExpr.Print($"return new PGF.Application(nameof({constr.Name}), {argsArray});");
 							}
 						}
 					}

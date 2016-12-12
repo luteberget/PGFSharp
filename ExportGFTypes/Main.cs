@@ -10,7 +10,7 @@ namespace ExportGFTypes
 {
 	public class MainClass {
 		class Options {
-			[Option('c', "convert", 
+			[Option('c', "convert", Required = true,
 				HelpText = "Input files to be processed.")]
 			public string InputFile { get; set; }
 
