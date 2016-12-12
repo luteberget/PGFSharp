@@ -76,8 +76,6 @@ namespace PGF
         [DllImport(LIBNAME, CallingConvention = CC)]
         public static extern IntPtr pgf_start_cat(IntPtr pgf);
 
-        [DllImport(LIBNAME, CallingConvention = CC)]
-        public static extern void pgf_print_expr(IntPtr expr, IntPtr ctxt, int prec, IntPtr output, IntPtr err);
 
 		[DllImport(LIBNAME, CallingConvention = CC)]
 		public static extern void pgf_linearize (IntPtr concr, IntPtr expr, IntPtr out_, IntPtr err);
@@ -105,10 +103,16 @@ namespace PGF
 
 		[DllImport(LIBNAME, CallingConvention = CC)]
 		public static extern IntPtr pgf_read_type(IntPtr in_, IntPtr pool, IntPtr err);
-		#endregion
 
-		#region Expression
-		[DllImport(LIBNAME, CallingConvention = CC)]
+        [DllImport(LIBNAME, CallingConvention = CC)]
+        public static extern void pgf_print_type(IntPtr expr, IntPtr ctxt, int prec, IntPtr output, IntPtr err);
+        #endregion
+
+        #region Expression
+        [DllImport(LIBNAME, CallingConvention = CC)]
+        public static extern void pgf_print_expr(IntPtr expr, IntPtr ctxt, int prec, IntPtr output, IntPtr err);
+
+        [DllImport(LIBNAME, CallingConvention = CC)]
 		public static extern IntPtr pgf_read_expr(IntPtr in_, IntPtr pool, IntPtr err);
 
 		[DllImport(LIBNAME, CallingConvention = CC)]
@@ -183,6 +187,21 @@ namespace PGF
             public IntPtr grammar;
             public IntPtr obj;
         }*/
+
+        public static string ReadString(Action<IntPtr,int, IntPtr, IntPtr> f)
+        {
+            using (var pool = new NativeGU.PoolErr())
+            {
+                var sbuf = NativeGU.gu_string_buf(pool.Ptr);
+                var output = NativeGU.gu_string_buf_out(sbuf);
+
+                f(IntPtr.Zero, 0, output, pool.ErrPtr);
+
+                var strPtr = NativeGU.gu_string_buf_freeze(sbuf, pool.Ptr);
+                var str = Native.NativeString.StringFromNativeUtf8(strPtr);
+                return str;
+            }
+        }
 
         public delegate void IterFunc(IntPtr pgf, ref GuMapItor fn, IntPtr err);
 		public delegate void IterNameFunc(IntPtr pgf, string name, ref GuMapItor fn, IntPtr err);

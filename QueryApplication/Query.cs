@@ -87,7 +87,7 @@ namespace Query {
 			return expr.Accept(new Expression.Visitor<Object>() {
 				fVisitApplication = (fname,args) =>  {
 					if(fname == nameof(Number) && args.Length == 1)
-						return new Number((int)(((Literal)args[0]).Value));
+						return new Number((int)(((LiteralInt)args[0]).Value));
 					throw new ArgumentOutOfRangeException();
 				}
 
@@ -108,7 +108,7 @@ namespace Query {
 		}
 
 		public override Expression ToExpression() {
-			return new Application(nameof(Number), new Expression[]{new Literal(x1)});
+			return new Application(nameof(Number), new Expression[]{new LiteralInt(x1)});
 		}
 
 	}

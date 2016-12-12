@@ -15,7 +15,8 @@ namespace ExportGFTypes
 						Constructors = grammar.FunctionByCategory(catName).Select(funName => 
 							new CodeGenerator.Constructor {
 								Name = funName,
-								ArgumentTypes = Enumerable.Empty<string>().ToList(),// FIXME read the argument types from grammar.
+								ArgumentTypes = grammar.FunctionType(funName).Hypotheses.
+                                  Select(c => c.ToString()).ToList()
 							}).ToList()
 					}).ToList()
 			};

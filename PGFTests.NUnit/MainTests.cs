@@ -85,19 +85,19 @@ namespace PGFTests.NUnit
 
 		[Test]
 		public void LiteralTest() {
-			var intlit = new Literal (5);
+			var intlit = new LiteralInt (5);
 			Assert.AreEqual (5, intlit.Value);
 			Assert.AreEqual ("5", intlit.ToString ());
 
-			var fltlit = new Literal (9.9);
+			var fltlit = new LiteralFloat (9.9);
 			Assert.AreEqual (9.9, fltlit.Value);
 			Assert.IsTrue (fltlit.ToString ().StartsWith ("9,9"));
 
-			var strlit = new Literal ("hello");
+			var strlit = new LiteralString ("hello");
 			Assert.AreEqual ("hello", strlit.Value);
 			Assert.AreEqual ("\"hello\"", strlit.ToString ());
 
-			foreach(var l in new[]{ intlit, fltlit, strlit})
+			foreach(var l in new Literal[]{ intlit, fltlit, strlit})
 			  Assert.IsInstanceOf<Literal> (Expression.FromPtr (l.NativePtr, IntPtr.Zero));
 		}
 
@@ -111,22 +111,22 @@ namespace PGFTests.NUnit
 
 		[Test]
 		public void ApplicationTest() {
-			var arg1 = new Literal (1);
-			var arg2 = new Literal ("xyz");
+			var arg1 = new LiteralInt (1);
+			var arg2 = new LiteralString ("xyz");
 			var fname = "hello";
 
-			var expr = new Application (fname, new[]{ arg1, arg2 });
+			var expr = new Application (fname, new Expression[] { arg1, arg2 });
 			Assert.AreEqual ("hello 1 \"xyz\"", expr.ToString ());
 			Assert.IsInstanceOf<Application> (expr.Function);
 			Assert.IsInstanceOf<Literal> (expr.Argument);
-			Assert.AreEqual ("xyz", (expr.Argument as Literal).Value);
+			Assert.AreEqual ("xyz", (expr.Argument as LiteralString).Value);
 			var inner = expr.Function as Application;
 
 			Assert.IsInstanceOf<Function> (inner.Function);
 			var fun = inner.Function as Function;
 			Assert.AreEqual ("hello", fun.Name);
 
-			Assert.AreEqual (1, (inner.Argument as Literal).Value);
+			Assert.AreEqual (1, (inner.Argument as LiteralInt).Value);
 		}
 
 

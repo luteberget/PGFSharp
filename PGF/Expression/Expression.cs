@@ -54,8 +54,8 @@ namespace PGF
 
 		public interface IVisitor<R> {
 			R VisitLiteralInt (int value);
-			R VisitLiteralFlt (double value);
-			R VisitLiteralStr (string value);
+			R VisitLiteralFloat (double value);
+			R VisitLiteralString (string value);
 			R VisitApplication (string fname, Expression[] args);
 
 			//R VisitMetaVariable (int id); Dont' care about this for now...
@@ -69,9 +69,9 @@ namespace PGF
 			public Func<int,R> fVisitLiteralInt { get; set; } = null;
 			public R VisitLiteralInt (int x1) => fVisitLiteralInt(x1);
 			public Func<double,R> fVisitLiteralFlt { get; set; } = null;
-			public R VisitLiteralFlt (double x1) => fVisitLiteralFlt(x1);
+			public R VisitLiteralFloat (double x1) => fVisitLiteralFlt(x1);
 			public Func<string,R> fVisitLiteralStr { get; set; } = null;
-			public R VisitLiteralStr (string x1) => fVisitLiteralStr(x1);
+			public R VisitLiteralString (string x1) => fVisitLiteralStr(x1);
 			public Func<string, Expression[] ,R> fVisitApplication { get; set; } = null;
 			public R VisitApplication (string x1, Expression[] x2) => fVisitApplication(x1, x2);
 		}
@@ -102,7 +102,7 @@ namespace PGF
 		private static Dictionary<PgfExprTag, Func<IntPtr, IntPtr, Expression>> factories = 
 			new Dictionary<PgfExprTag, Func<IntPtr, IntPtr, Expression>>{
 
-			{ PgfExprTag.PGF_EXPR_LIT, (e, p) => new Literal (e, p) },
+			{ PgfExprTag.PGF_EXPR_LIT, (e, p) => Literal.FromPtr (e, p) },
 			{ PgfExprTag.PGF_EXPR_APP, (e, p) => new Application (e, p) },
 			{ PgfExprTag.PGF_EXPR_FUN, (e, p) => new Function (e, p) },
 			{ PgfExprTag.PGF_EXPR_META, (e, p) => new MetaVariable (e, p) }
@@ -116,19 +116,8 @@ namespace PGF
 				return new UnsupportedExpression (expr, pool);
 		}
 
-        public override string ToString()
-        {
-			using (var pool = new NativeGU.PoolErr ()) {
-				var sbuf = NativeGU.gu_string_buf (pool.Ptr);
-				var output = NativeGU.gu_string_buf_out (sbuf);
-
-				Native.pgf_print_expr (_expr, IntPtr.Zero, 0, output, pool.ErrPtr);
-
-				var strPtr = NativeGU.gu_string_buf_freeze (sbuf, pool.Ptr);
-				var str = Native.NativeString.StringFromNativeUtf8 (strPtr);
-				return str;
-			}
-        }
+        public override string ToString() =>
+            Native.ReadString((a, b, c, d) => Native.pgf_print_expr(_expr, a, b, c, d));
 
 
 		/*

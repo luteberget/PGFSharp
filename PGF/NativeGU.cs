@@ -40,7 +40,13 @@ namespace PGF
 		[DllImport(LIBNAME, CallingConvention = CC)]
 		public static extern bool gu_exn_is_raised(IntPtr err);
 
-		[DllImport(LIBNAME, CallingConvention = CC)]
+        [DllImport(LIBNAME, CallingConvention = CC)]
+        public static extern UIntPtr gu_seq_length(IntPtr seq);
+
+        [DllImport(LIBNAME, CallingConvention = CC)]
+        public static extern IntPtr gu_seq_data(IntPtr seq);
+
+        [DllImport(LIBNAME, CallingConvention = CC)]
 		public static extern void gu_enum_next (IntPtr enum_, ref IntPtr outPtr, IntPtr pool);
 
 		[DllImport(LIBNAME, CallingConvention = CC)]
@@ -57,6 +63,14 @@ namespace PGF
 			public int Tag;
 			public IntPtr Data;
 		}
+
+        public static T gu_seq_index<T>(IntPtr seq, int index)
+        {
+            var seqPtr = NativeGU.gu_seq_data(seq);
+            var hypoPtr = seqPtr + index * Marshal.SizeOf<T>();
+            var hypo = Marshal.PtrToStructure<T>(hypoPtr);
+            return hypo;
+        }
 
 		public class PoolErr : IDisposable {
 
