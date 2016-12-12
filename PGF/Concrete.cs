@@ -67,7 +67,7 @@ namespace PGF
 				if (tmpPool.Exception) {
 					throw new PGF.Exceptions.PGFException();
 				} else {
-					var cstr = NativeGU.gu_string_buf_freeze (out_, tmpPool.Ptr);
+					var cstr = NativeGU.gu_string_buf_freeze (buf, tmpPool.Ptr);
 					return Native.NativeString.StringFromNativeUtf8 (cstr);
 				}
 			}
