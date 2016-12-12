@@ -26,6 +26,15 @@ namespace RailCNL2Datalog
 				var parsed = lang.Parse (input).First();
 				var outputString = lang.Linearize (parsed);
 
+				var input1 = "en signal er en hovedsignal og en dvergsignal";
+				var parsed1 = lang.Parse (input1).First ();
+				var statement1 = RailCNL.Statement.FromExpression (parsed1);
+
+				var conv = new Converter ();
+
+				var rules = conv.ConvertStatement (statement1);
+
+
 				Console.WriteLine (outputString);
 			}
 		}
