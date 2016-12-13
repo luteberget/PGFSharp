@@ -7,36 +7,43 @@ namespace RailCNL2Datalog
 	{
 		public static void Main (string[] args)
 		{
-			Console.WriteLine ("Hello World!");
-
-			var stmt = new RailCNL.DistanceObligation(new RailCNL.SubjectClass(new RailCNL.StringClass("balise")),
-			  new RailCNL.AnyFound(new RailCNL.AnyDirectionObject(new RailCNL.ObjectClass(new RailCNL.StringClass("signal")))),
-			  new RailCNL.Eq(new RailCNL.MkValue(new RailCNL.StringTerm("500")))
-			);
-
-
-
 			using (var grammar = PGF.Grammar.FromFile ("/home/bjlut/Dropbox/RailCNL.pgf")) {
 				var lang = grammar.Languages.First ().Value;
-				//var expr = stmt.ToExpression ();
-				//var exprStr = expr.ToString ();
-				//var exprRead = grammar.ReadExpr (exprStr);
 
-				var input = "avstanden fra en balise til en signal må være 100";
-				var parsed = lang.Parse (input).First();
-				var outputString = lang.Linearize (parsed);
-
-				var input1 = "en signal er en hovedsignal og en dvergsignal";
-				var parsed1 = lang.Parse (input1).First ();
-				var statement1 = RailCNL.Statement.FromExpression (parsed1);
-
-				var conv = new Converter ();
-
-				var rules = conv.ConvertStatement (statement1);
+				Console.WriteLine ($"-- RailCNL2Datalog: {lang.ToString()}.");
+				string inputLine;
+				while(true) {
+					inputLine = Console.ReadLine ();
+					if (inputLine == null)
+						break;
+					
+					try {
+						var parsed = lang.Parse(inputLine).First();
+						Console.WriteLine($"-- Successfully parsed to: {parsed.ToString()}");
+						var statement = RailCNL.Statement.FromExpression(parsed);
+						var conv = new Converter();
 
 
-				Console.WriteLine (outputString);
+						var rules = conv.ConvertStatement(statement);
+						Console.WriteLine($"-- Parsed statement resulted in {rules.Count} rules.");
+						foreach(var rule in rules) {
+							Console.WriteLine(EmitDatalog.Generate(rule));
+						}
+					} catch (PGF.Exceptions.ParseErrorException e) {
+						Console.WriteLine("-- Parse failed.");
+					}
+
+					Console.WriteLine ();
+				}
+				Console.WriteLine ("-- Exiting.");
 			}
 		}
 	}
 }
+
+
+/*var stmt = new RailCNL.DistanceObligation(new RailCNL.SubjectClass(new RailCNL.StringClass("balise")),
+			  new RailCNL.AnyFound(new RailCNL.AnyDirectionObject(new RailCNL.ObjectClass(new RailCNL.StringClass("signal")))),
+			  new RailCNL.Eq(new RailCNL.MkValue(new RailCNL.StringTerm("500")))
+			);
+*/
