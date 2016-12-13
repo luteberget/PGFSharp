@@ -37,6 +37,7 @@
     <Compile Include="Converter.cs" />
     <Compile Include="EmitDatalog.cs" />
     <Compile Include="Exceptions.cs" />
+    <Compile Include="Relexer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

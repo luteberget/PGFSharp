@@ -19,6 +19,7 @@ namespace RailCNL2Datalog
 						break;
 					
 					try {
+						inputLine = Relexer.Input2GF(inputLine);
 						var parsed = lang.Parse(inputLine).First();
 						Console.WriteLine($"-- Successfully parsed to: {parsed.ToString()}");
 						var statement = RailCNL.Statement.FromExpression(parsed);
@@ -34,6 +35,8 @@ namespace RailCNL2Datalog
 						Console.WriteLine("-- Parse failed.");
 					} catch (RailCNL2Datalog.UnsupportedExpressionException e) {
 						Console.WriteLine ($"-- Unsupported expression: {e.Message}");
+					} catch(RailCNL2Datalog.LexerException e) {
+						Console.WriteLine ($"-- Error: statement must end with a period.");
 					}
 
 					Console.WriteLine ();
