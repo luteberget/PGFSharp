@@ -12,6 +12,7 @@ namespace RailCNL2Datalog
 
 				Console.WriteLine ($"-- RailCNL2Datalog: {lang.ToString()}.");
 				string inputLine;
+				int n = 1;
 				while(true) {
 					inputLine = Console.ReadLine ();
 					if (inputLine == null)
@@ -24,13 +25,15 @@ namespace RailCNL2Datalog
 						var conv = new Converter();
 
 
-						var rules = conv.ConvertStatement(statement);
+						var rules = conv.ConvertStatement(statement, $"interactive{n++}");
 						Console.WriteLine($"-- Parsed statement resulted in {rules.Count} rules.");
 						foreach(var rule in rules) {
 							Console.WriteLine(EmitDatalog.Generate(rule));
 						}
 					} catch (PGF.Exceptions.ParseErrorException e) {
 						Console.WriteLine("-- Parse failed.");
+					} catch (RailCNL2Datalog.UnsupportedExpressionException e) {
+						Console.WriteLine ($"-- Unsupported expression: {e.Message}");
 					}
 
 					Console.WriteLine ();

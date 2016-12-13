@@ -36,6 +36,7 @@
     <Compile Include="RailCNL.cs" />
     <Compile Include="Converter.cs" />
     <Compile Include="EmitDatalog.cs" />
+    <Compile Include="Exceptions.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

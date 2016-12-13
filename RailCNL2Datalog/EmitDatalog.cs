@@ -8,7 +8,7 @@ namespace RailCNL2Datalog
 	{
 		public static string Generate(RailCNL.Rule rule) =>
 			rule.Accept (new RailCNL.Rule.Visitor<string> (
-				VisitMkRule: (head,body) => Glit(head) + " :- " + Gconj(body)
+				VisitMkRule: (head,body) => Glit(head) + " :- " + Gconj(body) + "."
 			));
 
 		private static string Gconj(RailCNL.Conjunction c) =>
