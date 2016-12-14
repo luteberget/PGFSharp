@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace RailCNL2Datalog
 {
@@ -20,13 +21,19 @@ namespace RailCNL2Datalog
 					
 					try {
 						inputLine = Relexer.Input2GF(inputLine);
+
 						var parsed = lang.Parse(inputLine).First();
 						Console.WriteLine($"-- Successfully parsed to: {parsed.ToString()}");
 						var statement = RailCNL.Statement.FromExpression(parsed);
-						var conv = new Converter();
 
+						IList<RailCNL.Rule> rules = null;
+						try {
+							var conv = new Converter();
+							rules = conv.ConvertStatement(statement, $"interactive{n++}");
+						} catch (Exception e) {
+							throw new RailCNL2Datalog.UnsupportedExpressionException($"Converter failed unexpectedly.");
+						}
 
-						var rules = conv.ConvertStatement(statement, $"interactive{n++}");
 						Console.WriteLine($"-- Parsed statement resulted in {rules.Count} rules.");
 						foreach(var rule in rules) {
 							Console.WriteLine(EmitDatalog.Generate(rule));

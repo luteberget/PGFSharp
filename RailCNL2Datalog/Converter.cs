@@ -25,6 +25,7 @@ namespace RailCNL2Datalog
 		static readonly string PRED_DISTANCE = "distance"; // RailCons
 		static readonly string PRED_FOLLOWING = "following"; // RailCons
 		static readonly string PRED_DIRECTION = "dir"; // railML
+		static readonly string PRED_OPPOSITE_DIRECTION = "opposite_dir"; // railML
 		static readonly string PRED_SWITCH = "switch"; // railML
 
 		int fresh = 0;
@@ -242,31 +243,67 @@ namespace RailCNL2Datalog
 			};
 		}
 
-		private ConjL GetDirObj(Subject subj, string goalVar, string dirVar, RailCNL.DirectionalObject dirObj) {
+		private ConjL GetDirObj(Subject subj, string goalVar, string goalDirVar, RailCNL.DirectionalObject dirObj) {
+			var goalOtherDirVar =  goalDirVar + "Rev";
+			var goalOtherDirLit = PropertyLiteralC (PRED_OPPOSITE_DIRECTION, goalDirVar, goalOtherDirVar);
+
+			var subjOtherDirVar = subj.DirVar + "Rev";
+			var subjOtherDirLit = PropertyLiteralC (PRED_OPPOSITE_DIRECTION, subj.DirVar, subjOtherDirVar);
+
 			return dirObj.Accept (new RailCNL.DirectionalObject.Visitor<ConjL> (
 
-				VisitAnyDirectionObject: obj => {
-					return obj.Accept(new RailCNL.Object.Visitor<ConjL>(
-						VisitObjectClass: null,
-						VisitObjectPropertyRestriction: null
-					));
-				},
+				// TODO: simplify 
 
-				VisitFacingSwitch: () => 
-				AndConjunction (new List<RailCNL.Conjunction> { ClassLiteralC (PRED_SWITCH, goalVar) },
-					AndConjunction (new List<RailCNL.Conjunction> { PropertyLiteralC (PRED_DIRECTION, goalVar, dirVar) },
-						new List<RailCNL.Conjunction> { Literal3 (PRED_FOLLOWING, subj.Variable, goalVar, dirVar) })),
 
-				VisitOppositeDirectionObject: null,
+				VisitFacingSwitch: () => And(
+					ClassLiteralC (PRED_SWITCH, goalVar), 
+					PropertyLiteralC (PRED_DIRECTION, goalVar, goalDirVar) ,
+					Literal3 (PRED_FOLLOWING, subj.Variable, goalVar, goalDirVar) ),
 
-				VisitOppositeSearchDirecitonObject: null,
 
-				VisitSameDirectionObject: null,
+				VisitOppositeDirectionObject: obj => AndConjunction(ObjectSpec(obj,goalVar),
+					And( PropertyLiteralC(PRED_DIRECTION, goalVar, subjOtherDirVar ),
+						subj.Dir, subjOtherDirLit )),
 
-				VisitSearchDirectionObject: null,
 
-				VisitTrailingSwitch: null
 
+				VisitOppositeSearchDirecitonObject: obj => AndConjunction(ObjectSpec(obj,goalVar),
+					And(PropertyLiteralC(PRED_DIRECTION, goalVar, goalDirVar ),
+						Literal3(PRED_FOLLOWING, subj.Variable, goalVar, goalOtherDirVar),
+						goalOtherDirLit)),
+
+
+
+				VisitSameDirectionObject: obj => AndConjunction(ObjectSpec(obj,goalVar),
+					And( PropertyLiteralC(PRED_DIRECTION, goalVar, subj.DirVar ),
+						subj.Dir  )),
+
+
+
+				VisitSearchDirectionObject: obj => AndConjunction(ObjectSpec(obj,goalVar),
+					And(PropertyLiteralC(PRED_DIRECTION, goalVar, goalDirVar ),
+						Literal3(PRED_FOLLOWING, subj.Variable, goalVar, goalDirVar))),
+
+
+
+				VisitTrailingSwitch: () => And(
+					ClassLiteralC (PRED_SWITCH, goalVar), 
+					PropertyLiteralC (PRED_DIRECTION, goalVar, goalDirVar) ,
+					Literal3 (PRED_FOLLOWING, subj.Variable, goalVar, goalOtherDirVar),
+					goalOtherDirLit ),
+				
+				VisitAnyDirectionObject: obj => ObjectSpec(obj, goalVar)
+
+			));
+		}
+
+		private ConjL ObjectSpec(RailCNL.Object obj, string goalVar) {
+			return obj.Accept(new RailCNL.Object.Visitor<ConjL>(
+				VisitObjectClass: cls => SubjectClassLiterals (cls, goalVar),
+				VisitObjectPropertyRestriction: (cls, propRestr) => {
+					var clsConj = SubjectClassLiterals(cls, goalVar);
+					return AndConjunction(clsConj, PropertyRestrictionLiterals(propRestr, goalVar));
+				}
 			));
 		}
 
@@ -419,6 +456,18 @@ namespace RailCNL2Datalog
 				new RailCNL.StringTerm (t1), 
 				new RailCNL.StringTerm (t2),
 				new RailCNL.StringTerm (t3)));
+		}
+
+		private ConjL Literals(params RailCNL.Literal[] p) {
+			return p.Select (l => (RailCNL.Conjunction) new RailCNL.SimpleConj (l)).ToList ();
+		}
+
+		private ConjL And(params ConjL[] ls) {
+			return ls.Aggregate (AndConjunction).ToList ();
+		}
+
+		private ConjL And(params RailCNL.Conjunction[] ls) {
+			return ls.Select(l => new ConjL { l }).Aggregate (AndConjunction).ToList ();
 		}
 
 	}
