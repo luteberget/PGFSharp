@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PGFSharp", "PGF\PGFSharp.csproj", "{81C13B1B-FE00-4A56-A831-964D55032CDD}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PGFTests", "PGFTests\PGFTests.csproj", "{A6A2BFDA-E129-4B0B-B3C3-77AAF1A77E2B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApplication1", "ConsoleApplication1\ConsoleApplication1.csproj", "{4434319E-75FA-4277-BC9F-B7E98DA8BFC5}"
@@ -26,6 +24,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Editor", "Editor\Editor.csproj", "{06CA7BA4-07CE-4280-868C-5E1BC2A6A8BD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSDList", "XSDList\XSDList.csproj", "{BD1B0EF0-607C-4996-88F3-99EB545C2FD4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibPGFSharp", "LibPGFSharp\LibPGFSharp.csproj", "{81C13B1B-FE00-4A56-A831-964D55032CDD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

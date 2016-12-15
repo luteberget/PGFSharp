@@ -45,9 +45,9 @@
       <Project>{B9B29BA2-8DF9-4D36-82C1-FD349E269A33}</Project>
       <Name>ExportGFTypes</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PGF\PGFSharp.csproj">
+    <ProjectReference Include="..\LibPGFSharp\LibPGFSharp.csproj">
       <Project>{81C13B1B-FE00-4A56-A831-964D55032CDD}</Project>
-      <Name>PGFSharp</Name>
+      <Name>LibPGFSharp</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>
