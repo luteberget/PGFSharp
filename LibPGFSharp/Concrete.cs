@@ -76,5 +76,33 @@ namespace PGF
 		public string LinearizeAll(Expression e) {
 			throw new NotImplementedException ();
 		}
+
+		public Bracket BracketedLinearize(Expression e) {
+			using (var tmpPool = new NativeGU.PoolErr ()) {
+				var cts = Native.pgf_lzr_concretize (Ptr, e.NativePtr, tmpPool.ErrPtr, tmpPool.Ptr);
+
+				var ctree = IntPtr.Zero;
+				NativeGU.gu_enum_next(cts, ref ctree, tmpPool.Ptr);
+
+				if (ctree == IntPtr.Zero) {
+					return null;
+				}
+
+				ctree = Native.pgf_lzr_wrap_linref (ctree, tmpPool.Ptr);
+
+				var builder = new Bracket.BracketBuilder ();
+
+				var mem = Marshal.AllocHGlobal(Marshal.SizeOf<Native.PgfLinFuncs>());
+				Marshal.StructureToPtr<Native.PgfLinFuncs> (builder.LinFuncs, mem, false);
+
+				Native.pgf_lzr_linearize (Ptr, ctree, 0, ref mem, tmpPool.Ptr);
+
+				var b =  builder.Build ();
+
+				Marshal.FreeHGlobal (mem);
+
+				return b;
+			}
+		}
     }
 }

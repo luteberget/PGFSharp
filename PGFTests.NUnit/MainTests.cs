@@ -12,6 +12,20 @@ namespace PGFTests.NUnit
 	public class MainTests
 	{
 		[Test]
+		public void BracketedLinearise() {
+
+			using(var grammar = Grammar.FromFile("/home/bjlut/Dropbox/RailCNL.pgf")) {
+
+				var lang = grammar.Languages.First ().Value;
+				var expr = lang.Parse ("en signal er en signal").First();
+				
+				var lin = lang.BracketedLinearize (expr);
+				var str = lin.ToString ();	
+				var myStr = lin.ToBracketsString;
+			}
+		}
+		
+		[Test]
 		public void Canary(){}
 
 		[Test ()]

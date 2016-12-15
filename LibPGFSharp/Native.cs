@@ -76,9 +76,21 @@ namespace PGF
         [DllImport(LIBNAME, CallingConvention = CC)]
         public static extern IntPtr pgf_start_cat(IntPtr pgf);
 
+		#endregion
+
+		#region Linearization
 
 		[DllImport(LIBNAME, CallingConvention = CC)]
 		public static extern void pgf_linearize (IntPtr concr, IntPtr expr, IntPtr out_, IntPtr err);
+
+		[DllImport(LIBNAME, CallingConvention = CC)]
+		public static extern IntPtr pgf_lzr_concretize (IntPtr concr, IntPtr expr, IntPtr err, IntPtr tmp_pool);
+
+		[DllImport(LIBNAME, CallingConvention = CC)]
+		public static extern IntPtr pgf_lzr_wrap_linref(IntPtr ctree, IntPtr tmp_pool);
+
+		[DllImport(LIBNAME, CallingConvention = CC)]
+		public static extern void pgf_lzr_linearize(IntPtr concr, IntPtr ctree, int lin_idx, ref IntPtr funcs, IntPtr tmp_pool);
 		#endregion
 
 
@@ -178,6 +190,52 @@ namespace PGF
 			public float prob;
 			public IntPtr expr; // PgfExpr type (not pointer, but typedef PgfExpr -> GuVariant -> uintptr_t)
 		}
+
+
+		#region Linearization callbacks
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		public delegate void LinFuncSymbolToken(IntPtr self, IntPtr token);
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		public delegate void LinFuncBeginPhrase(IntPtr self, IntPtr cat, int fid, int lindex, IntPtr fun);
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		public delegate void LinFuncEndPhrase(IntPtr self, IntPtr cat, int fid, int lindex, IntPtr fun);
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		public delegate void LinFuncSymbolNonexistant (IntPtr self);
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		public delegate void LinFuncSymbolBinding (IntPtr self);
+
+		[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+		public delegate void LinFuncSymbolCapitalization (IntPtr self);
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct PgfLinFuncs
+		{
+			[MarshalAs(UnmanagedType.FunctionPtr)]
+			public LinFuncSymbolToken symbol_token;
+
+			[MarshalAs(UnmanagedType.FunctionPtr)]
+			public LinFuncBeginPhrase begin_prase;
+
+			[MarshalAs(UnmanagedType.FunctionPtr)]
+			public LinFuncEndPhrase end_phrase;
+
+			[MarshalAs(UnmanagedType.FunctionPtr)]
+			public LinFuncSymbolNonexistant symbol_ne;
+
+			[MarshalAs(UnmanagedType.FunctionPtr)]
+			public LinFuncSymbolBinding symbol_bind;
+
+			[MarshalAs(UnmanagedType.FunctionPtr)]
+			public LinFuncSymbolCapitalization symbol_capit;
+		}
+
+		#endregion
+
 
         /*
         [StructLayout(LayoutKind.Sequential)]
