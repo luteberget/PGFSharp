@@ -98,6 +98,19 @@ namespace PGFTests.NUnit
         }
 
         [Test]
+        public void FunctionArguments()
+        {
+            var grammar = Grammar.FromFile(grammarFile);
+            var f = "Is";
+            var type = grammar.FunctionType(f);
+            var arg1 = type.Hypotheses.ElementAt(0).ToString();
+            var arg2 = type.Hypotheses.ElementAt(1).ToString();
+
+            Assert.AreEqual("Item", arg1);
+            Assert.AreEqual("Quality", arg2);
+        }
+
+        [Test]
         public void ReadExpression()
         {
             var grammar = Grammar.FromFile(grammarFile);
