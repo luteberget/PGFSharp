@@ -55,10 +55,10 @@
     <Compile Include="Expression\Function.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="gu.dll">
+    <Content Include="build\gu.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="pgf.dll">
+    <Content Include="build\pgf.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

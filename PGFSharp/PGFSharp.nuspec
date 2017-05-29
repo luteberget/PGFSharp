@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>3.8.1-devel</version>
+    <title>$title$</title>
+    <authors>Grammatical Framework authors</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://www.grammaticalframework.org/</licenseUrl>
+    <projectUrl>https://github.com/luteberget/PGFSharp</projectUrl>
+    <iconUrl>http://cloud.grammaticalframework.org/P/gf-cloud.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Grammatical Framework runtime library wrapper for C#/.NET</description>
+  </metadata>
+  <files>
+    <file src="build\gu.dll" target="build" />
+    <file src="build\pgf.dll" target="build" />
+    <file src="build\PGFSharp.targets" target="build" />
+  </files>
+</package>
