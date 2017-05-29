@@ -1,11 +1,20 @@
 # Grammatical Framework PGF library .NET wrapper
 
+This is a C#/.NET library for using Grammatical Framework, see https://www.grammaticalframework.org/
+
 This project contains: 
 1. A C# library which wraps the `pgf` and `gu` native libraries
 2. A class generator which generates code for representing PGF categories and constructors as C# classes. 
    The classes can be constructed from PGF expressions and converted back into PGF expressions.
 
 Together, these part produce a lightweight PGF library which can be distributed with Windows/.NET (or Linux/Mono) desktop applications.
+
+The package is listed on nuget (https://www.nuget.org/packages/PGFSharp/). To install, run the following command in the Package Manager Console
+
+```shell
+PM> Install-Package PGFSharp -Pre
+```
+
 
 ## An application using the class generator
 
