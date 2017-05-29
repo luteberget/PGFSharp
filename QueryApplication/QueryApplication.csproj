@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -37,7 +37,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <ProjectReference Include="..\LibPGFSharp\LibPGFSharp.csproj">
+    <ProjectReference Include="..\PGFSharp\PGFSharp.csproj">
       <Project>{81C13B1B-FE00-4A56-A831-964D55032CDD}</Project>
       <Name>LibPGFSharp</Name>
     </ProjectReference>

@@ -7,38 +7,32 @@ using System.Threading.Tasks;
 
 namespace PGF
 {
+    /// <summary>
+    /// A GF type.
+    /// </summary>
     public class Type
     {
-        private Grammar Grammar;
-        private IntPtr _type;
+        private IntPtr _ptr;
+        internal IntPtr Ptr => _ptr;
+        private NativeGU.NativeMemoryPool _pool;
+        private Type() { }
 
-        private IntPtr _pool = IntPtr.Zero; // FIXME: Initialized to null? See Python wrapper: PGF_functionType
-
-        private Type(Grammar grammar, IntPtr ptr)
+        internal static Type FromPtr(IntPtr type, NativeGU.NativeMemoryPool pool)
         {
-            this.Grammar = grammar;
-            this._type = ptr;
-        }
-
-        private Type(IntPtr type, IntPtr pool)
-        {
-        }
-
-        internal static Type FromPtr(Grammar grammar, IntPtr type)
-        {
-            return new Type(grammar, type);
-        }
-
-        internal static Type FromPtrs(IntPtr type, IntPtr pool)
-        {
-            return new Type(type, pool);
+            var t = new Type();
+            t._ptr = type;
+            t._pool = pool;
+            return t;
         }
 
         public override string ToString() =>
-            Native.ReadString((a, b, c, d) => Native.pgf_print_type(_type, a, b, c, d));
+            Native.ReadString((output,exn) => Native.pgf_print_type(_ptr, IntPtr.Zero, 0, output, exn.Ptr));
 
-        private PgfType Data => Marshal.PtrToStructure<PgfType>(_type);
+        private PgfType Data => Marshal.PtrToStructure<PgfType>(_ptr);
 
+        /// <summary>
+        /// Get the hypotheses of a type (function argument types).
+        /// </summary>
         public IEnumerable<Type> Hypotheses
         {
             get
@@ -47,14 +41,14 @@ namespace PGF
                 for (int i = 0; i < n_hypos; i++)
                 {
                     var hypo = NativeGU.gu_seq_index<PgfHypo>(Data.hypos, i);
-                    var type = new Type(this.Grammar, hypo.type);
+                    var type = Type.FromPtr(hypo.type, this._pool);
                     yield return type;
                 }
             }
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct PgfType
+        protected struct PgfType
         {
             public IntPtr hypos; // GuSeq of PgfHypo
             public IntPtr cid;
@@ -63,7 +57,7 @@ namespace PGF
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct PgfHypo
+        protected struct PgfHypo
         {
             public int pgfBindType; // enum
             public IntPtr cid; // PgfCId (string)

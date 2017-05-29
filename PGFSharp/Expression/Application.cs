@@ -5,22 +5,22 @@ using System.Linq;
 
 namespace PGF
 {
-	public class Application : Expression
+	public class ApplicationExpression : Expression
 	{
 		public override R Accept<R> (IVisitor<R> visitor)
 		{
 			var args = new List<Expression> ();
 			var expr = this;
-			while (expr.Function is Application) {
+			while (expr.Function is ApplicationExpression) {
 				args.Add (expr.Argument);
-				expr = expr.Function as Application;
+				expr = expr.Function as ApplicationExpression;
 			}
 			args.Add (expr.Argument);
-			if (!(expr.Function is Function))
+			if (!(expr.Function is FunctionExpression))
 				throw new ArgumentException ();
 
 			args.Reverse ();
-			return visitor.VisitApplication ((expr.Function as Function).Name, args.ToArray());
+			return visitor.VisitApplication ((expr.Function as FunctionExpression).Name, args.ToArray());
 		}
 		
 		[StructLayout(LayoutKind.Sequential)]
@@ -34,19 +34,19 @@ namespace PGF
 		public Expression Function => Expression.FromPtr(Data.Function, _pool);
 		public Expression Argument => Expression.FromPtr(Data.Argument, _pool);
 
-		internal Application(IntPtr ptr, IntPtr pool) : base(ptr, pool) {	}
-		public Application (string fname, IEnumerable<Expression> args)
+		internal ApplicationExpression(IntPtr ptr, NativeGU.NativeMemoryPool pool) : base(ptr, pool) {	}
+		public ApplicationExpression (string fname, IEnumerable<Expression> args)
 		{
-			_pool = NativeGU.gu_new_pool ();
-			MkStringVariant((byte)PgfExprTag.PGF_EXPR_FUN, fname, ref _expr);
+			_pool = new NativeGU.NativeMemoryPool();
+			MkStringVariant((byte)PgfExprTag.PGF_EXPR_FUN, fname, ref _ptr);
 			foreach (var arg in args) {
-				var fun = _expr;
+				var fun = _ptr;
 				var exprApp = NativeGU.gu_alloc_variant((byte)PgfExprTag.PGF_EXPR_APP,
-					(UIntPtr)Marshal.SizeOf<PgfExprApp>(), UIntPtr.Zero, ref _expr, _pool);
+					(UIntPtr)Marshal.SizeOf<PgfExprApp>(), UIntPtr.Zero, ref _ptr, _pool.Ptr);
 
 				Native.EditStruct<PgfExprApp> (exprApp, (ref PgfExprApp app) => {
 					app.Function = fun;
-					app.Argument = arg.NativePtr;
+					app.Argument = arg.Ptr;
 				});
 			}
 

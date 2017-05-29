@@ -49,7 +49,7 @@ namespace Query {
 		}
 
 		public override Expression ToExpression() {
-			return new Application(nameof(Yes), new Expression[]{});
+			return new ApplicationExpression(nameof(Yes), new Expression[]{});
 		}
 
 	}
@@ -63,7 +63,7 @@ namespace Query {
 		}
 
 		public override Expression ToExpression() {
-			return new Application(nameof(No), new Expression[]{});
+			return new ApplicationExpression(nameof(No), new Expression[]{});
 		}
 
 	}
@@ -87,7 +87,7 @@ namespace Query {
 			return expr.Accept(new Expression.Visitor<Object>() {
 				fVisitApplication = (fname,args) =>  {
 					if(fname == nameof(Number) && args.Length == 1)
-						return new Number((int)(((LiteralInt)args[0]).Value));
+						return new Number((int)(((LiteralIntExpression)args[0]).Value));
 					throw new ArgumentOutOfRangeException();
 				}
 
@@ -108,7 +108,7 @@ namespace Query {
 		}
 
 		public override Expression ToExpression() {
-			return new Application(nameof(Number), new Expression[]{new LiteralInt(x1)});
+			return new ApplicationExpression(nameof(Number), new Expression[]{new LiteralIntExpression(x1)});
 		}
 
 	}
@@ -165,7 +165,7 @@ namespace Query {
 		}
 
 		public override Expression ToExpression() {
-			return new Application(nameof(Even), new Expression[]{x1.ToExpression()});
+			return new ApplicationExpression(nameof(Even), new Expression[]{x1.ToExpression()});
 		}
 
 	}
@@ -181,7 +181,7 @@ namespace Query {
 		}
 
 		public override Expression ToExpression() {
-			return new Application(nameof(Odd), new Expression[]{x1.ToExpression()});
+			return new ApplicationExpression(nameof(Odd), new Expression[]{x1.ToExpression()});
 		}
 
 	}
@@ -197,7 +197,7 @@ namespace Query {
 		}
 
 		public override Expression ToExpression() {
-			return new Application(nameof(Prime), new Expression[]{x1.ToExpression()});
+			return new ApplicationExpression(nameof(Prime), new Expression[]{x1.ToExpression()});
 		}
 
 	}

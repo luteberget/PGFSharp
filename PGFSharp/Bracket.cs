@@ -10,17 +10,16 @@ namespace PGF
 	// These classes just store the data, they do not own or use
 	// unmanaged memory (except in the builder class).
 	
-	public interface IChildBracket {
+	public interface IBracketChild {
 		bool IsString {get;}
 		string AsStringChild {get;}
 		Bracket AsBracketChild {get;}
 	}
 
 
-
-	public class Bracket : IChildBracket
+	public class Bracket : IBracketChild
     {
-		public class StringChildBracket : IChildBracket {
+		public class StringChildBracket : IBracketChild {
 
 			string str;
 			internal StringChildBracket(string str) {
@@ -84,11 +83,11 @@ namespace PGF
 			}
 		}
 
-		private List<IChildBracket> _children = new List<IChildBracket> ();
+		private List<IBracketChild> _children = new List<IBracketChild> ();
 		private Bracket() {
 		}
 
-		private void AddChild(IChildBracket c) {
+		private void AddChild(IBracketChild c) {
 			_children.Add(c);
 		}
 
@@ -100,7 +99,7 @@ namespace PGF
 			}
 		}
 
-		public IEnumerable<IChildBracket> Children { get { return _children; } }
+		public IEnumerable<IBracketChild> Children { get { return _children; } }
 
 		public string CatName { get; private set; }
 		public string FunName { get; private set; }
