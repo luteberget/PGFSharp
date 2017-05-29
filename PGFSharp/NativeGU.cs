@@ -42,23 +42,6 @@ namespace PGF
         public static extern bool gu_exn_is_raised(IntPtr err);
 
         [DllImport(LIBNAME, CallingConvention = CC)]
-        public static extern int gu_testX(IntPtr err);
-
-        [DllImport(LIBNAME, CallingConvention = CC)]
-        [return: MarshalAs(UnmanagedType.I1)]
-        public static extern bool gu_falsex(IntPtr err);
-
-        [DllImport(LIBNAME, CallingConvention = CC)]
-        [return: MarshalAs(UnmanagedType.I1)]
-        public static extern bool gu_truex(IntPtr err);
-
-        [DllImport(LIBNAME, CallingConvention = CC)]
-        public static extern UIntPtr gu_seq_length(IntPtr seq);
-
-        [DllImport(LIBNAME, CallingConvention = CC)]
-        public static extern IntPtr gu_seq_data(IntPtr seq);
-
-        [DllImport(LIBNAME, CallingConvention = CC)]
         public static extern void gu_enum_next(IntPtr enum_, ref IntPtr outPtr, IntPtr pool);
 
         [DllImport(LIBNAME, CallingConvention = CC)]
@@ -77,10 +60,23 @@ namespace PGF
             public IntPtr Data;
         }
 
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct GuSeq
+        {
+            public UIntPtr length;
+        }
+
+        public static uint SeqLength(IntPtr seqptr)
+        {
+            var seq = Marshal.PtrToStructure<GuSeq>(seqptr);
+            return (uint)seq.length;
+        }
+
         public static T gu_seq_index<T>(IntPtr seq, int index)
         {
-            var seqPtr = NativeGU.gu_seq_data(seq);
-            var hypoPtr = seqPtr + index * Marshal.SizeOf<T>();
+            var dataPtr = seq + Marshal.SizeOf<GuSeq>();
+            var hypoPtr = dataPtr + index * Marshal.SizeOf<T>();
             var hypo = Marshal.PtrToStructure<T>(hypoPtr);
             return hypo;
         }
@@ -111,7 +107,7 @@ namespace PGF
             public NativeExceptionContext(NativeMemoryPool pool)
             {
                 _ptr = gu_new_exn(pool.Ptr);
-                if (_ptr == null) throw new Exception();
+                if (_ptr == IntPtr.Zero) throw new Exception();
             }
 
             public bool IsRaised => gu_exn_is_raised(_ptr);

@@ -37,7 +37,7 @@ namespace PGF
         {
             get
             {
-                var n_hypos = (uint)NativeGU.gu_seq_length(Data.hypos);
+                var n_hypos = NativeGU.SeqLength(Data.hypos);
                 for (int i = 0; i < n_hypos; i++)
                 {
                     var hypo = NativeGU.gu_seq_index<PgfHypo>(Data.hypos, i);
