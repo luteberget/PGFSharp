@@ -1,4 +1,4 @@
-# Grammatical Framework PGF library .NET wrapper
+# Grammatical Framework PGF library .NET bindings
 
 This is a C#/.NET library for using Grammatical Framework, see https://www.grammaticalframework.org/
 
