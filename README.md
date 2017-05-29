@@ -1,32 +1,11 @@
 # Grammatical Framework PGF library .NET wrapper
 
-This project contains three parts:
-
-1. A patch and a CMake configuration for the GF C runtime, allowing it to be built with the MSVC.
-2. A C# library which wraps the `pgf` and `gu` native libraries
-3. A class generator which generates code for representing PGF categories and constructors as C# classes. 
+This project contains: 
+1. A C# library which wraps the `pgf` and `gu` native libraries
+2. A class generator which generates code for representing PGF categories and constructors as C# classes. 
    The classes can be constructed from PGF expressions and converted back into PGF expressions.
 
-Together, these part produce a lightweight PGF library which can be distributed with Windows desktop applications.
-
-## Development status
-The library can be used for basic PGF applications, but some work remains:
-
- * Some memory management issues remain, notably in the clean-up of the `Expression` class. Will use the Python wrapper as example of how this should be done.
- * Callback noun functions from parser are not yet supported.
- * Parser sentence completion (predictive parsing).
- * Load/unload languages.
-
-The following items are **not** planned for inclusion.
-
- * Higher-order and dependent types can be used through the basic inteface, but the `Expression` class does not support manipulation of them.
- * Representing type information in C#.
- * Evaluation of parses (?)
- * Tabular linearize. (?)
- * Graphviz generation.
- * Full form lexicon.
- * Morphological lookup.
- * Type-check expression.
+Together, these part produce a lightweight PGF library which can be distributed with Windows/.NET (or Linux/Mono) desktop applications.
 
 ## An application using the class generator
 
